@@ -8,6 +8,7 @@ public class SystemUtil {
     }
 	// Line reader
     public String[] lineReader(String line){
+    	
         String[] str = new String[NUMCOLS];
         int index =  0;
         final char chComma = ',';
@@ -38,7 +39,10 @@ public class SystemUtil {
     }
 // check plan
 	public boolean isValid(String plan){
-		if(plan.isBlank() || !plan.isEmpty() || plan == null){
+		if(plan == null) {
+			return true;
+		}
+		else if(plan.isBlank() || !plan.isEmpty() ){
 			return true;
 		}
 		return false;	

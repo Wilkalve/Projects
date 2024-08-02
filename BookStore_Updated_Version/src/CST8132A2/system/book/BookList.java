@@ -10,60 +10,60 @@ import java.util.ArrayList;
 
 import CST8132A2.system.exception.BookException;
 import CST8132A2.system.exception.UserException;
+import CST8132A2.system.user.User;
+import CST8132A2.system.util.SystemUtil;
 
 public class BookList {
-    ArrayList<Book> bestSellers;
+    
+private  ArrayList<Book> bestSellers;
     public BookList(){
-        this.bestSellers = new ArrayList<>();
+    	this.bestSellers = new ArrayList<>();
+    
     }
 
 	// load the book list
 	public void loadBookList(String csvFile) throws BookException {
-		bestSellers = new ArrayList<Book>();
-
+		
+		SystemUtil util = new SystemUtil();
+		 String line;
+		 
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(csvFile));
-			String line;
+			   reader.readLine();
+		      
 			while ((line = reader.readLine()) != null) {
-				String[] values = line.split(",");
+				 
 
-				try {
-					if (values.length == 6) {
-
-						String title = String.join(",", values[0]);
-						String author = String.join(",", values[1]);
-						String language = String.join(",", values[2]);
-						String year = String.join(",", values[3]);
-						String sales = String.join(",", values[4]);
-						String genre = String.join(",", values[5]);
-						
-						
-						addToList(Book.createBook(title, author, language, year, sales, genre));
-
-					}
-				} catch (NumberFormatException nfe) {
-					throw new BookException(" " + nfe);
+				String[] parsedLine = util.lineReader(line);
+			
+				if (parsedLine.length == 6) {
+					addToList(Book.createBook(parsedLine[0], parsedLine[1], parsedLine[2], parsedLine[3], parsedLine[4],
+							parsedLine[5]));
 				}
+				
+		
 			}
-
-            System.out.println("Book successfully added to bestsellers.");
-            reader.close();
-        } catch(FileNotFoundException fne){
-            throw new BookException(" " + fne);
-        } catch(IOException e){
-            throw new BookException(" " + e);
-        } 
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			System.out.println("~ Book successfully added to bestsellers......................");
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			reader.close();
+			
+		} catch (FileNotFoundException fne) {
+			throw new BookException(" The system cannot find the file specified" );
+		} catch (IOException e) {
+			
+		}
      }
 
       // print book list
    public void printBookList() throws BookException{
 	   
-	   if(bestSellers.isEmpty() || bestSellers == null){
+	   if(getBestSellers().isEmpty() || getBestSellers() == null){
            System.out.println("The bestsellers list is empty ");
        }
        else{
         
-            for (Book book : bestSellers) {
+            for (Book book : getBestSellers()) {
                     getSizeBook();	
                     System.out.println(book);
                     break;
@@ -74,25 +74,24 @@ public class BookList {
      	// return arraylist size
 	public void getSizeBook() throws BookException {
 		
-		for (int i = 0; i < bestSellers.size(); i++) {
+		for (int i = 0; i < getBestSellers().size(); i++) {
 
-			System.out.println((i + 1) + ". " + bestSellers.get(i).toStringBook());
+			System.out.println((i + 1) + ". " + getBestSellers().get(i).toStringBook());
 		}
 	}
 
 
     // search book by index
-    public void findBookByIndex(int index) throws BookException{
-       
-       try {
-        if(index >= 0 || index < bestSellers.size()){
-            Book book = bestSellers.get(index);
-            System.out.println(index + ". " + book.toStringBook());
-       }
+    public Book findBookByIndex(int index) throws BookException{
 
-     } catch (IndexOutOfBoundsException e) {
-        throw new BookException(" " + e);
-       }
+		if (index >= 0 || index < getBestSellers().size()) {
+			getBestSellers().get(index);
+
+		} else {
+			throw new BookException(" Index out of bound for length " + index);
+
+		}
+		return getBestSellers().get(index);
 
     }
    
@@ -100,16 +99,15 @@ public class BookList {
     public void searchBookList(String search) throws BookException{
         ArrayList<Book> result = new ArrayList<>();
       
-        if(bestSellers.isEmpty() || search.isEmpty()){
+		if (getBestSellers().isEmpty() || search.isEmpty()) {
 			System.out.println("The search list cannot be empty or null.");
 		} else {
-			for (Book book : bestSellers) {
+			for (Book book : getBestSellers()) {
 				try {
 					if (book.getName().toLowerCase().contains(search.toLowerCase())
 							|| book.getLanguage().toLowerCase().contains(search.toLowerCase())
-							|| book.getAuthor().toLowerCase().contains(search.toLowerCase())
-							|| book.getGenre().toLowerCase().contains(search.toLowerCase())) {
-						
+							|| book.getAuthor().toLowerCase().contains(search.toLowerCase())) {
+
 						result.add(book);
 						System.out.println(book.toStringBook());
 					}
@@ -135,7 +133,7 @@ public class BookList {
     	if(year.isEmpty() || year == null) {
     		System.out.println("The search list cannot be empty or null.");
     	}
-			for (Book bk : bestSellers) {
+			for (Book bk : getBestSellers()) {
 				
 				if(Integer.parseInt(year) == bk.getPublished()) {
 					find.add(bk);
@@ -151,40 +149,18 @@ public class BookList {
     }
 		
     // Add book to list
-    public void addToList(Book book){
-        bestSellers.add(book);
+    public void addToList(Book parsedLine){
+        getBestSellers().add(parsedLine);
     }
     
-    // download book
-    public void downloading(int pos) throws UserException, BookException{
-    	
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter("UserDownloadBook.txt"))){
-        
-			
-              for(Book bk: bestSellers) {
-            	  
-			if (bk == bestSellers.get(pos)) {
-				String name = bk.getName();
-				String author = bk.getAuthor();
-				String language = bk.getLanguage();
-				int year = bk.getPublished();
-				float sale = bk.getMilionSales();
-				String genre = bk.getGenre();
-				
-				writer.write("Title: " + name + ", Author: " + author + ", Language: " + language + ", Year published: " + year + ", Milion sales: " + sale + ", Genre: " + genre);
-				writer.newLine();
-		
-			}
-              }
-             
-              writer.close();
-			
-            System.out.println("Book list save successfully.");
+	public ArrayList<Book> getBestSellers() {
+		return bestSellers;
+	}
 
-        }catch(IOException e){
-            throw new UserException("" + e);
-        }
-
-    }
+	public void setBestSellers(ArrayList<Book> bestSellers) {
+		this.bestSellers = bestSellers;
+	}
+    
+   
     
 }

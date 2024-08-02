@@ -7,7 +7,7 @@ HashSet<String> languageSet = new HashSet<>();
 BookList lists = new BookList();
 public void addLanguage(String language){
     languageSet.add(language);
-    for(Book book: lists.bestSellers){
+    for(Book book: lists.getBestSellers()){
         languageSet.add(book.getLanguage());
      }
 }

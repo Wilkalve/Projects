@@ -3,6 +3,7 @@ package CST8132A2.system.user;
 import java.util.ArrayList;
 import java.io.*;
 import CST8132A2.system.book.Book;
+import CST8132A2.system.book.BookList;
 import CST8132A2.system.exception.BookException;
 import CST8132A2.system.exception.UserException;
 import CST8132A2.system.util.SystemUtil;
@@ -10,7 +11,8 @@ import CST8132A2.system.util.SystemUtil;
 public class User {
 private String email;
 private String password;
-ArrayList<Book> bookList;
+private ArrayList<Book> bookList;
+
 UserPlan plan;
 
 
@@ -54,14 +56,13 @@ public void setPassword(String password){
 }
 
 // Add book 
-public void addToBookList(Book usr){
-
-	if (plan.getIsActive() == true) {
-		
-		bookList.add(usr);
-	} else {
-		System.out.println("Cannot add to booklist, account not active.");
-	}
+public void addToBookList(Book userBook){
+		if(plan.getIsActive() == true) {
+		 bookList.add(userBook);	
+		}
+		else {
+			System.out.println("User account not active.");
+		}
 
 }
 // Search book by index
@@ -127,16 +128,15 @@ public Book createUserBook(String name, String author, String language, String y
 
 public void displayBookList() throws UserException, BookException{
     
-	if(bookList.isEmpty()){
-        System.out.println("The bestsellers list is empty ");
+	if(bookList == null || bookList.isEmpty()){
+        System.out.println("The BookList list is empty ");
     }
-    else{
+    
         for (Book book : bookList) {
                 getSize();	
                 System.out.println(book);
-                break;
+               break;
             }
-    }
 }
 
 // return arraylist size
@@ -152,5 +152,42 @@ public void getSize() throws BookException {
 public String tostringUser(){
  return "email: " + email + plan.toStringPlan();
 }
+
+
+//download book
+public void downloading(int pos) throws UserException, BookException{
+	
+	 Book book = bookList.get(pos);
+    try(BufferedWriter writer = new BufferedWriter(new FileWriter("UserDownloadBook.txt"))){
+               
+		if (book == bookList.get(pos)) {
+			
+			for(Book bk : bookList) {
+			String name = bk.getName();
+			String author = bk.getAuthor();
+			String language = bk.getLanguage();
+			int year = bk.getPublished();
+			float sale = bk.getMilionSales();
+			String genre = bk.getGenre();
+
+			writer.write("Title: " + name + ", Author: " + author + ", Language: " + language + ", Year published: "
+					+ year + ", Milion sales: " + sale + ", Genre: " + genre);
+			writer.newLine();
+			
+		 
+			}
+		
+          }
+         
+          writer.close();
+		
+        System.out.println("Book Downloaded successfully.");
+
+    }catch(IOException e){
+        throw new UserException("" + e);
+    }
+    
+}
+
 
 }

@@ -9,7 +9,7 @@ Book blk = new Book();
 // populate the the hashSet list
 public void addGenre(String genre){
     genreSet.add(genre);
-    for( Book book: list.bestSellers){
+    for( Book book: list.getBestSellers()){
       genreSet.add(book.getGenre()); 
   
     }

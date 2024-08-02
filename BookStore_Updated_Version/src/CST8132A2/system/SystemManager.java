@@ -40,16 +40,9 @@ public class SystemManager {
 
 // Create booklist
 	public static void createBookList(BookList bkList, String fileName) throws BookException {
-		SystemUtil util = new SystemUtil();
-		util.lineReader(fileName);
-
-		try {
+	
 			bkList.loadBookList(fileName);
-		} catch (BookException e) {
-			throw new BookException("" + e);
-		} catch (@SuppressWarnings("hiding") IOException e) {
-			throw new BookException("" + e);
-		}
+		
 
 	}
 
@@ -106,15 +99,22 @@ public class SystemManager {
 	}
 
 // Add book to user list
-	public static void addBookInmyList(BookList bks, String name, String author, String published, String language,
-			String milionSales, String genre) throws BookException, UserException {
+	public static void addBookInmyList(User usr, BookList bkl, int pos) throws BookException, UserException {
 
-		bks.addToList(Book.createBook(name, author, published, language, milionSales, genre));
+		Book book = bkl.findBookByIndex(pos);
+
+		String year = String.valueOf(book.getPublished());
+		String sales = String.valueOf(book.getMilionSales());
+
+		usr.addToBookList(
+				usr.createUserBook(book.getName(), book.getAuthor(), book.getLanguage(), year, sales, book.getGenre()));
+		System.out.println("Book Successfully added to User list.");
+
 	}
 
 // Show user book list
-	public static void showMyBookList(BookList usr) throws BookException {
-		usr.printBookList();
+	public static void showMyBookList(User usr) throws UserException, BookException  {
+		usr.displayBookList();
 
 	}
 
@@ -292,7 +292,7 @@ public class SystemManager {
 
 							if (password.equals(usr.getPassword())) {
 								System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-								System.out.println("~ " + usr.getEmail() + " Successfully login to the system...");
+								System.out.println("~ " + usr.getEmail() + " Successfully login to the system.....          ||");
 								System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 								
 					   Scanner user = new Scanner(System.in);
@@ -305,7 +305,7 @@ public class SystemManager {
 						 try {
 							 newUsr = input.next();
 							 if(newUsr.matches("[a-z]") || newUsr.matches("[A-Z]") ) {
-								  throw new BookException("Invalid! letter character not allow.");
+								  System.out.println( " Invalid! letter character not allow.");
 							  }
 							 
 							 if(Integer.parseInt(newUsr) == OPTION_USER_10) {
@@ -313,57 +313,21 @@ public class SystemManager {
 							 }
 							 else if(Integer.parseInt(newUsr) == OPTION_USER_11) {
 								 
-								 System.out.print("Enter book name: ");
-								 String name = user.next();
-								 user.nextLine();
-								 if(!util.isValid(name)){
-								        throw new UserException(" Name cannot be null, blank or empty.");
-								    } 
-								 System.out.print("Enter author name: ");
-								 String author = user.next();
-								 user.nextLine();
-								 if(!util.isValid(author)){
-								        throw new UserException(" Author cannot be null, blank or empty.");
-								    } 
-								 System.out.print("Enter language: ");
-								 String language = user.next();
-								 user.nextLine();
-								 if(!util.isValid(language)){
-								        throw new UserException(" Language cannot be null, blank or empty.");
-								    } 
-								 System.out.print("Enter the year published: ");
-								 String year = user.next();
-								 user.nextLine();
-								 
-								 if(!util.isValid(year)){
-								        throw new UserException(" Published year cannot be null, blank or empty.");
-								    } 
-								 System.out.print("Enter milion of sales:");
-								 String sales = user.next();
-								 user.nextLine();
-								 if(!util.isValid(sales)){
-								        throw new UserException(" Milion sales cannot be null, blank or empty.");
-								    } 
-								 
-								 System.out.print("Enter book genre: ");
-								 String genre = user.next();
-									user.nextLine();
+								        System.out.print("Enter book index: ");
+								        int index = user.nextInt();
+								        user.nextLine();
+	
+								        if (plan.getIsActive() == true) {
 
-									if (!util.isValid(genre)) {
-										throw new UserException(" Genre cannot be null, blank or empty.");
-									}
+											SystemManager.addBookInmyList(usr, bookList, index);
 
-									if (plan.getIsActive() == true) {
-
-										SystemManager.addBookInmyList(bookList, name, author, language, year, sales,
-												genre);
-									} else {
-										System.out.println("Cannot add to booklist, account not active.");
-										System.out.println();
-									}
+										} else {
+											System.out.println("Cannot add to booklist, account not active.");
+											System.out.println();
+										}
 
 								} else if(Integer.parseInt(newUsr) == OPTION_USER_12) {
-								 SystemManager.showMyBookList(bookList);
+								 SystemManager.showMyBookList(usr);
 							 }
 							 else if(Integer.parseInt(newUsr) == OPTION_USER_13) {
 								 
@@ -372,7 +336,8 @@ public class SystemManager {
 								 if(plan.getIsActive() == true) {
 						        	 System.out.print("Enter book index: ");
 									 int index = user.nextInt();
-									 bookList.findBookByIndex(index);
+									 usr.findBookByIndex(index);
+									 
 						         } else {
 						        	 System.out.println("Cannot read books because user account not active. ");
 						        	 System.out.println("Option [15] can be selected to change user active state.");
@@ -388,8 +353,8 @@ public class SystemManager {
 										SystemManager.downloadBook(usr);
 										System.out.print("Enter book index: ");
 										int index = user.nextInt();
-										bookList.findBookByIndex(index);
-										bookList.downloading(index);
+										usr.findBookByIndex(index);
+										usr.downloading(index);
 									} 
 									else{
 										System.out.print("Book cannot be downloaded because plan is: " + plan.getPlan());
@@ -448,15 +413,16 @@ public class SystemManager {
 							 }
 							 else if(Integer.parseInt(newUsr) > 16 || Integer.parseInt(newUsr) < 10) {
 								  throw new UserException(" The range for input number cannot be greater then <<16>> or less than <<10>>");
+								 
 							  }
 							 else if(Integer.parseInt(newUsr) == OPTION_USER_16) {
 								 SystemManager.logOff(usr);
 								 break;
 							 }
  
-							  
+							
 						 } catch(IOException e) {
-							 throw new BookException("" + e);
+							 
 						 }
 					 }
 					  
